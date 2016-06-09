@@ -1,3 +1,13 @@
+"""
+Formula One Bar Graph 1950-2016
+
+author: Shoji Moto
+github: https://github.com/PianoBin
+website: http://pianobin.us.to/
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
+"""
+
 from bs4 import BeautifulSoup
 import urllib.request
 import numpy as np
@@ -7,10 +17,10 @@ from matplotlib import style
 
 
 def graph(drivers, nations, cars, pts):
-	top10driv = []
-	top10nat = []
-	top10car = []
-	top10pts = []
+	top10driv = np.array()
+	top10nat = np.array()
+	top10car = np.array()
+	top10pts = np.array()
 
 	for val in range(0, 10):
 		top10driv.append(drivers[val])
@@ -19,14 +29,19 @@ def graph(drivers, nations, cars, pts):
 		top10pts.append(pts[val])
 
 	count = 10
-	ind = np.arange(count)
 	
 	fig, ax = plt.subplots()
 	
-	for num in range(0, 10):
-		rects = ax.barh(ind[num], top10pts[num])
+	#for num in range(0, 10):
+	#	rects = ax.barh(ind[num], top10pts[num])
 
-	#rects = ax.barh(int(ind), top10pts)
+	ylocs = np.arange(10) + 0.5
+	#ax.barh(ylocs, top10pts)
+
+	for num in range(0, 10):
+		ax.barh(ylocs[num], top10pts[num])
+
+	grid(True)
 
 	ax.set_ylabel('Standings')
 	ax.set_xlabel('Points')
