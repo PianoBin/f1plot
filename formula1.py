@@ -783,6 +783,7 @@ for year in range(1950, 2017):
 	else:
 		holdGraph(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year)
 	for times in range(0, 20): #animate 20 times
+		settings()
 		animate(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year, drivList[year - 1949], natList[year - 1949], carsList[year - 1949], pointsList[year - 1949], times) #current year and the next year
 
 
