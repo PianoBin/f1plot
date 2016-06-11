@@ -123,12 +123,12 @@ def graph(drivers, nations, cars, pts, yr):
 	distance = theMax - theMin
 	ax.set_xlim([0, distance * 0.2 + distance])
 
-	ax.set_ylabel('Standings', fontweight = 'bold', **cfont)
-	ax.set_xlabel('Points', fontweight = 'bold', **cfont)
+	ax.set_ylabel('Standings', fontsize = 20, fontweight = 'bold', **cfont)
+	ax.set_xlabel('Points', fontsize = 20, fontweight = 'bold', **cfont)
 	ax.set_yticks(ylocs + 0.5)
-	ax.set_yticklabels(labels, fontweight = 'bold', **cfont)
+	ax.set_yticklabels(labels, fontsize = 15, fontweight = 'bold', **cfont)
 	#ax.set_xticks(fontweight = 'bold', **cfont)
-	ax.set_title("Standings for the " + str(yr) + " Formula 1 Season", fontweight = 'bold', **cfont)
+	ax.set_title("Standings for the " + str(yr) + " Formula 1 Season", fontsize = 35, fontweight = 'bold', **cfont)
 
 	rect = 10
 
@@ -204,21 +204,13 @@ def graph(drivers, nations, cars, pts, yr):
 		ax.text(width, 11 - rect, top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
 		rect -= 1
 
-	ax.grid(axis = 'y')
-	gridlines = ax.get_xgridlines()
-	for line in gridlines:
-		line.set_color('slategray')
-
-	figManager = plt.get_current_fig_manager()
-	figManager.window.showMaximized()
 	plt.draw()
 	plt.show()
 
-style.use("fivethirtyeight")
 
-
-
-#Global images
+####################################
+###########Global images############
+####################################
 ARG1 = cbook.get_sample_data(abspath('ARG.png'), asfileobj=False)
 AUS1 = cbook.get_sample_data(abspath('AUS.png'), asfileobj=False)
 AUT1 = cbook.get_sample_data(abspath('AUT.png'), asfileobj=False)
@@ -250,7 +242,6 @@ SUI1 = cbook.get_sample_data(abspath('SWI.png'), asfileobj=False)
 THA1 = cbook.get_sample_data(abspath('THA.png'), asfileobj=False)
 USA1 = cbook.get_sample_data(abspath('USA.png'), asfileobj=False)
 VEN1 = cbook.get_sample_data(abspath('VEN.png'), asfileobj=False)
-
 background1 = cbook.get_sample_data(abspath('SPA.jpg'), asfileobj=False)
 
 ARG2 = image.imread(ARG1)
@@ -284,7 +275,6 @@ SUI2 = image.imread(SUI1)
 THA2 = image.imread(THA1)
 USA2 = image.imread(USA1)
 VEN2 = image.imread(VEN1)
-
 background = image.imread(background1)
 
 ARG = OffsetImage(ARG2)
@@ -320,8 +310,9 @@ USA = OffsetImage(USA2)
 VEN = OffsetImage(VEN2)
 
 
-
-#PLOT
+####################################
+##########FIGURE SETTINGS###########
+####################################
 fig = plt.figure(1, facecolor = 'white')
 ax = fig.add_subplot(1, 1, 1)
 
@@ -334,8 +325,24 @@ ax.spines['left'].set_color('dimgray')
 
 ax.patch.set_alpha(0.75)
 background[-1, -1, -1] = 0.2
-fig.figimage(background)
+fig.figimage(background, alpha = .75)
 
+ax.grid(True)
+gridlines = ax.get_xgridlines()
+gridlinesy = ax.get_ygridlines()
+for line in gridlines:
+	line.set_color('k')
+for line in gridlinesy:
+	line.set_alpha(0)
+
+style.use("fivethirtyeight")
+
+figManager = plt.get_current_fig_manager()
+figManager.window.showMaximized()
+
+####################################
+##########READING FILES#############
+####################################
 with open("drivers.txt") as drivFile:
 	drivData = drivFile.readlines()
 	num = 67
