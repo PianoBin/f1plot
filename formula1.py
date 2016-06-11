@@ -8,8 +8,6 @@ license: MIT
 Please feel free to use and modify this, but keep the above information. Thanks!
 """
 
-from bs4 import BeautifulSoup
-import urllib.request
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
@@ -214,18 +212,7 @@ def graph(drivers, nations, cars, pts, yr):
 	plt.draw()
 	plt.show()
 
-
-urls = []
-part1 = "http://www.formula1.com/content/fom-website/en/results.html/"
-part2 = "/drivers.html"
-
-year = 1950
-
 style.use("fivethirtyeight")
-
-for num in range(1950, 2017):
-	url = part1 + str(num) + part2
-	urls.append(url)
 
 
 
@@ -348,33 +335,33 @@ background[-1, -1, -1] = 0.5
 fig.figimage(background)
 
 
+with open("drivers.txt") as drivFile:
+	drivData = drivFile.readlines()
+	num = 67
+	drivList = [[] for a in range(num)]
+	for val in range(0, 67):
+		drivList[val] = drivData[val].split(",")
 
+with open("nations.txt") as natFile:
+	natData = natFile.readlines()
+	num = 67
+	natList = [[] for a in range(num)]
+	for val in range(0, 67):
+		natList[val]  = natData[val].split(",")
 
-for address in urls:
-	req = urllib.request.Request(address)
-	with urllib.request.urlopen(req) as response:
-		page = response.read()
+with open("cars.txt") as carsFile:
+	carsData = carsFile.readlines()
+	num = 67
+	carsList = [[] for a in range(num)]
+	for val in range(0, 67):
+		carsList[val] = carsData[val].split(",")
 
-	soup = BeautifulSoup(page, "html.parser")
-	
+with open("points.txt") as pointsFile:
+	pointsData = pointsFile.readlines()
+	num = 67
+	pointsList = [[] for a in range(num)]
+	for val in range(0, 67):
+		pointsList[val] = pointsData[val].split(",")
 
-	drivers = []
-	nations = []
-	cars = []
-	pts = []
-
-	for span in soup.find_all("span", class_ = 'hide-for-mobile'):
-		drivers.append(span.get_text())
-
-	for td in soup.find_all("td", class_ = 'dark semi-bold uppercase'):
-		nations.append(td.get_text())
-
-	for a in soup.find_all("a", class_ = 'grey semi-bold uppercase ArchiveLink'):
-		cars.append(a.get_text())
-
-	for td in soup.find_all("td", class_ = 'dark bold'):
-		pts.append(td.get_text())
-
-	graph(drivers, nations, cars, pts, year)
-
-	year += 1
+for year in range(1950, 2017):
+	graph(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year)
