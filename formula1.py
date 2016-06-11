@@ -325,7 +325,7 @@ ax.spines['left'].set_color('dimgray')
 
 ax.patch.set_alpha(0.75)
 background[-1, -1, -1] = 0.2
-fig.figimage(background, alpha = .75)
+fig.figimage(background, alpha = .5)
 
 ax.grid(True)
 gridlines = ax.get_xgridlines()
