@@ -213,7 +213,6 @@ def graph(drivers, nations, cars, pts, yr):
 	figManager.window.showMaximized()
 	plt.draw()
 	plt.show()
-	plt.clear()
 
 
 urls = []
