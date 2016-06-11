@@ -43,6 +43,8 @@ def graph(drivers, nations, cars, pts, yr):
 
 	cfont = {'fontname': 'Verdana'}
 
+	#cfont = {'fontname': 'Arial Black'}
+
 	count = 10
 	
 	ylocs = np.arange(10) + 0.75
@@ -320,9 +322,9 @@ VEN = OffsetImage(VEN2)
 
 
 #PLOT
-fig = plt.figure(1, facecolor = 'dimgray')
+fig = plt.figure(1, facecolor = 'white')
 ax = fig.add_subplot(1, 1, 1)
-	
+
 ax.set_axis_bgcolor('dimgray')
 
 ax.spines['bottom'].set_color('dimgray')
@@ -331,9 +333,8 @@ ax.spines['right'].set_color('dimgray')
 ax.spines['left'].set_color('dimgray')
 
 ax.patch.set_alpha(0.75)
-background[-1, -1, -1] = 0.5
+background[-1, -2, -1] = 0.2
 fig.figimage(background)
-
 
 with open("drivers.txt") as drivFile:
 	drivData = drivFile.readlines()
