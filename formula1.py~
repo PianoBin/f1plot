@@ -34,6 +34,10 @@ def graph(drivers, nations, cars, pts, yr):
 	
 	top10pts = list(map(float, top10pts))
 
+	for count in range(0, 10):
+		if top10pts[count] % 1 == 0:
+			top10pts[count] = (int)(top10pts[count])
+
 	print (top10driv)
 	print (top10nat)
 	print (top10car)
@@ -45,16 +49,7 @@ def graph(drivers, nations, cars, pts, yr):
 	
 	ylocs = np.arange(10) + 0.75
 
-	fig = plt.figure(1, facecolor = 'dimgray')
-	ax = fig.add_subplot(1, 1, 1)
 	
-	ax.set_axis_bgcolor('dimgray')
-
-	ax.spines['bottom'].set_color('dimgray')
-	ax.spines['top'].set_color('black') 
-	ax.spines['right'].set_color('dimgray')
-	ax.spines['left'].set_color('dimgray')
-
 	while count > 0:
 		if top10nat[count - 1] == 'ITA':
 			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'r', edgecolor = 'none')
@@ -141,7 +136,7 @@ def graph(drivers, nations, cars, pts, yr):
 		width = (distance * 0.01) + top10pts[rect - 1]
 		leng = len(top10driv[rect - 1])
 		width2 = top10pts[rect - 1] - (leng * 0.5)
-		width3 = top10pts[rect - 1] - (leng * 0.1)
+		width3 = top10pts[rect - 1] - (leng * 0.15)
 		ax.text(width2, 11 - rect, top10driv[rect - 1], color = 'black', fontweight = 'bold', **cfont)
 		if top10nat[rect - 1] == 'ITA':
 			abox = AnnotationBbox(ITA, (width3, 11 - rect + 0.15))
@@ -205,9 +200,8 @@ def graph(drivers, nations, cars, pts, yr):
 			abox = AnnotationBbox(USA, (width3, 11 - rect + 0.15))
 		elif top10nat[rect - 1] == 'VEN':
 			abox = AnnotationBbox(VEN, (width3, 11 - rect + 0.15))
-		print ("HI")
 		ax.add_artist(abox)
-		ax.text(width, 11 - rect, top10car[rect - 1] + ", " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
+		ax.text(width, 11 - rect, top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
 		rect -= 1
 
 	ax.grid(axis = 'y')
@@ -217,8 +211,9 @@ def graph(drivers, nations, cars, pts, yr):
 
 	figManager = plt.get_current_fig_manager()
 	figManager.window.showMaximized()
-
+	plt.draw()
 	plt.show()
+	plt.clear()
 
 
 urls = []
@@ -268,6 +263,8 @@ THA1 = cbook.get_sample_data(abspath('THA.png'), asfileobj=False)
 USA1 = cbook.get_sample_data(abspath('USA.png'), asfileobj=False)
 VEN1 = cbook.get_sample_data(abspath('VEN.png'), asfileobj=False)
 
+background1 = cbook.get_sample_data(abspath('SPA.jpg'), asfileobj=False)
+
 ARG2 = image.imread(ARG1)
 AUS2 = image.imread(AUS1)
 AUT2 = image.imread(AUT1)
@@ -300,6 +297,8 @@ THA2 = image.imread(THA1)
 USA2 = image.imread(USA1)
 VEN2 = image.imread(VEN1)
 
+background = image.imread(background1)
+
 ARG = OffsetImage(ARG2)
 AUS = OffsetImage(AUS2)
 AUT = OffsetImage(AUT2)
@@ -331,6 +330,25 @@ SUI = OffsetImage(SUI2)
 THA = OffsetImage(THA2)
 USA = OffsetImage(USA2)
 VEN = OffsetImage(VEN2)
+
+
+
+#PLOT
+fig = plt.figure(1, facecolor = 'dimgray')
+ax = fig.add_subplot(1, 1, 1)
+	
+ax.set_axis_bgcolor('dimgray')
+
+ax.spines['bottom'].set_color('dimgray')
+ax.spines['top'].set_color('black') 
+ax.spines['right'].set_color('dimgray')
+ax.spines['left'].set_color('dimgray')
+
+ax.patch.set_alpha(0.75)
+background[-1, -1, -1] = 0.5
+fig.figimage(background)
+
+
 
 
 for address in urls:
