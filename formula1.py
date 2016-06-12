@@ -17,7 +17,8 @@ import matplotlib.image as image
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from os.path import abspath
 import time
-
+import warnings
+warnings.filterwarnings("ignore",category=cbook.mplDeprecation)
 
 ####################################
 ###########FIRST RUN################
@@ -124,8 +125,8 @@ def firstRun(drivers, nations, cars, pts, yr):
 
 	#Stuff that changes each time
 	(theMin, theMax) = ax.get_xlim()
-	distance = theMax - theMin
-	ax.set_xlim([0, distance * 0.2 + distance])
+	oldDistance = theMax - theMin
+	ax.set_xlim([0, oldDistance * 0.2 + oldDistance])
 
 	ax.set_yticks(ylocs + 0.5)
 	ax.set_yticklabels(labels, fontsize = 15, fontweight = 'bold', **cfont)
@@ -134,11 +135,14 @@ def firstRun(drivers, nations, cars, pts, yr):
 
 	rect = 10
 
+	(Min, Max) = ax.get_xlim()
+	distance = Max - Min
+
 	while rect > 0: #Show details
 		width = (distance * 0.01) + top10pts[rect - 1]
 		leng = len(top10driv[rect - 1])
-		width2 = top10pts[rect - 1] - (leng * 0.5)
-		width3 = top10pts[rect - 1] - (leng * 0.1)
+		width2 = top10pts[rect - 1] - (leng * 0.4)
+		width3 = top10pts[rect - 1] - (leng * 0.6)
 		ax.text(width2, 11 - rect, top10driv[rect - 1], color = 'black', fontweight = 'bold', **cfont)
 		if top10nat[rect - 1] == 'ITA':
 			abox = AnnotationBbox(ITA, (width3, 11 - rect + 0.15))
@@ -206,7 +210,7 @@ def firstRun(drivers, nations, cars, pts, yr):
 		ax.text(width, 11 - rect, top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
 		rect -= 1
 
-	plt.pause(5)
+	plt.pause(3)
 	plt.cla()
 
 
@@ -315,8 +319,8 @@ def holdGraph(drivers, nations, cars, pts, yr):
 
 	#Stuff that changes each time
 	(theMin, theMax) = ax.get_xlim()
-	distance = theMax - theMin
-	ax.set_xlim([0, distance * 0.2 + distance])
+	oldDistance = theMax - theMin
+	ax.set_xlim([0, oldDistance * 0.2 + oldDistance])
 
 	ax.set_yticks(ylocs + 0.5)
 	ax.set_yticklabels(labels, fontsize = 15, fontweight = 'bold', **cfont)
@@ -325,11 +329,14 @@ def holdGraph(drivers, nations, cars, pts, yr):
 
 	rect = 10
 
+	(Min, Max) = ax.get_xlim()
+	distance = Max - Min
+
 	while rect > 0: #Show details
 		width = (distance * 0.01) + top10pts[rect - 1]
 		leng = len(top10driv[rect - 1])
-		width2 = top10pts[rect - 1] - (leng * 0.5)
-		width3 = top10pts[rect - 1] - (leng * 0.1)
+		width2 = top10pts[rect - 1] - (leng * 0.4)
+		width3 = top10pts[rect - 1] - (leng * 0.6)
 		ax.text(width2, 11 - rect, top10driv[rect - 1], color = 'black', fontweight = 'bold', **cfont)
 		if top10nat[rect - 1] == 'ITA':
 			abox = AnnotationBbox(ITA, (width3, 11 - rect + 0.15))
@@ -397,13 +404,72 @@ def holdGraph(drivers, nations, cars, pts, yr):
 		ax.text(width, 11 - rect, top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
 		rect -= 1
 
-	plt.pause(5)
+	plt.pause(3)
 	plt.cla()
+
+####################################
+#############Y CHANGE###############
+####################################
+def yChange(driver, nextYearDrivers, pos):
+	changePos = 11
+	for num in range(0, 10):
+		if nextYearDrivers[num] == driver:
+			changePos = np.abs((num + 1) - pos)
+	
+	if changePos == 0:
+		return 0
+	elif changePos == 1:
+		return 0.025
+	elif changePos == 2:
+		return 0.05
+	elif changePos == 3:
+		return 0.075
+	elif changePos == 4:
+		return 0.1
+	elif changePos == 5:
+		return 0.125
+	elif changePos == 6:
+		return 0.15
+	elif changePos == 7:
+		return 0.175
+	elif changePos == 8:
+		return 0.2
+	elif changePos == 9:
+		return 0.225
+	elif changePos == 10:
+		return 0.25
+	elif changePos == 11: #Dropped out of top 10
+		return 0.275
+
+####################################
+#############Y DIREC################
+####################################
+def yDirec(driver, nextYearDrivers, pos):
+	newPos = 11
+	for num in range(0, 10):
+		if nextYearDrivers[num] == driver:
+			newPos = num + 1
+	
+	if pos > newPos: #moved up
+		return "up"
+	elif pos < newPos:
+		return "down"
+	else:
+		return "same"
+
+####################################
+#############X CHANGE###############
+####################################
+def xChange(driver, nextYearDrivers, pts, nextYearPts):
+	for num in range(0, 10):
+		if nextYearDrivers[num] == driver:
+			return ((pts - nextYearPts[num]) / 40)
+	return (pts / 40)
 
 ####################################
 #############ANIMATE################
 ####################################
-def animate(drivers, nations, cars, pts, yr, drivers2, nations2, cars2, pts2, times):
+def animate(drivers, nations, cars, pts, yr, drivers2, nations2, cars2, pts2):
 	#Top 10
 	top10driv = []
 	top10nat = []
@@ -437,165 +503,186 @@ def animate(drivers, nations, cars, pts, yr, drivers2, nations2, cars2, pts2, ti
 			top10pts[count] = (int)(top10pts[count])
 		if top10pts2[count] % 1 == 0:
 			top10pts2[count] = (int)(top10pts2[count])
-
-	count = 10 # run below 10 times
 	
-	ylocs = np.arange(10) + 0.75 #array of top 10 y spots
+	yChanges = [] #amount of change each anim for top 10 spots
+	yDirections = [] #which direction to move
+	xChanges = [] #amount of change each anim for top 10 spots
+	ylocs = np.arange(10) + .75
+
+	for val in range(0, 10): #Find y change
+		move = yChange(top10driv[val], top10driv2, val + 1)
+		yChanges.append(move)
+		direc = yDirec(top10driv[val], top10driv2, val + 1)
+		yDirections.append(direc)
+
+	for val in range(0, 10): #Find x change
+		move = xChange(top10driv[val], top10driv2, top10pts[val], top10pts2)
+		xChanges.append(move)
 
 	
-	while count > 0:
-		if top10nat[count - 1] == 'ITA':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'r', edgecolor = 'none')
-		elif top10nat[count - 1] == 'ARG':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'aqua', edgecolor = 'none')
-		elif top10nat[count - 1] == 'AUS':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'navy', edgecolor = 'none')
-		elif top10nat[count - 1] == 'AUT':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'indianred', edgecolor = 'none')
-		elif top10nat[count - 1] == 'BEL':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'lightseagreen', edgecolor = 'none')
-		elif top10nat[count - 1] == 'BRA':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'green', edgecolor = 'none')
-		elif top10nat[count - 1] == 'CAN':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'linen', edgecolor = 'none')
-		elif top10nat[count - 1] == 'COL':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'goldenrod', edgecolor = 'none')
-		elif top10nat[count - 1] == 'DEN':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'lightcoral', edgecolor = 'none')
-		elif top10nat[count - 1] == 'ESP':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'y', edgecolor = 'none')
-		elif top10nat[count - 1] == 'FIN':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'lavender', edgecolor = 'none')
-		elif top10nat[count - 1] == 'FRA':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'steelblue', edgecolor = 'none')
-		elif top10nat[count - 1] == 'GBR':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'gold', edgecolor = 'none')
-		elif top10nat[count - 1] == 'GER':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'yellow', edgecolor = 'none')
-		elif top10nat[count - 1] == 'HUN':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'darkgreen', edgecolor = 'none')
-		elif top10nat[count - 1] == 'IND':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'peru', edgecolor = 'none')
-		elif top10nat[count - 1] == 'IRE':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'springgreen', edgecolor = 'none')
-		elif top10nat[count - 1] == 'JPN':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'white', edgecolor = 'none')
-		elif top10nat[count - 1] == 'MEX':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'rosybrown', edgecolor = 'none')
-		elif top10nat[count - 1] == 'MON':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'lightsalmon', edgecolor = 'none')
-		elif top10nat[count - 1] == 'NED':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'darkblue', edgecolor = 'none')
-		elif top10nat[count - 1] == 'NZL':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'slateblue', edgecolor = 'none')
-		elif top10nat[count - 1] == 'POL':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'darkorange', edgecolor = 'none')
-		elif top10nat[count - 1] == 'RHO':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'forestgreen', edgecolor = 'none')
-		elif top10nat[count - 1] == 'RSA':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'indigo', edgecolor = 'none')
-		elif top10nat[count - 1] == 'RUS':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'deeppink', edgecolor = 'none')
-		elif top10nat[count - 1] == 'SWE':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'royalblue', edgecolor = 'none')
-		elif top10nat[count - 1] == 'SUI':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'firebrick', edgecolor = 'none')
-		elif top10nat[count - 1] == 'THA':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'tomato', edgecolor = 'none')
-		elif top10nat[count - 1] == 'USA':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'crimson', edgecolor = 'none')
-		elif top10nat[count - 1] == 'VEN':
-			ax.barh(ylocs[10 - count], top10pts[count - 1], color = 'pink', edgecolor = 'none')
-		else:
-			ax.barh(ylocs[10 - count], top10pts[count - 1], edgecolor = 'none')
-		count -= 1
-
-	#Stuff that changes each time
-	(theMin, theMax) = ax.get_xlim()
-	distance = theMax - theMin
-	ax.set_xlim([0, distance * 0.2 + distance])
-
-	ax.set_yticks(ylocs + 0.5)
-	ax.set_yticklabels(labels, fontsize = 15, fontweight = 'bold', **cfont)
-	ax.set_title("Standings for the " + str(yr) + " Formula 1 Season", fontsize = 35, fontweight = 'bold', **cfont)
+	for val in range(0, 10): #apply signs
+		if yDirections[val] == "down":
+			yChanges[val] = yChanges[val] * -1 #make negative
+			xChanges[val] = xChanges[val] * -1 #decrease x
 
 
-	rect = 10
+	for times in range(0, 40): #animate 40 times
+		count = 10 # run below 10 times
+		while count > 0:
+			if top10nat[count - 1] == 'ITA':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'r', edgecolor = 'none')
+			elif top10nat[count - 1] == 'ARG':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'aqua', edgecolor = 'none')
+			elif top10nat[count - 1] == 'AUS':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'navy', edgecolor = 'none')
+			elif top10nat[count - 1] == 'AUT':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'indianred', edgecolor = 'none')
+			elif top10nat[count - 1] == 'BEL':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'lightseagreen', edgecolor = 'none')
+			elif top10nat[count - 1] == 'BRA':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'green', edgecolor = 'none')
+			elif top10nat[count - 1] == 'CAN':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'linen', edgecolor = 'none')
+			elif top10nat[count - 1] == 'COL':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'goldenrod', edgecolor = 'none')
+			elif top10nat[count - 1] == 'DEN':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'lightcoral', edgecolor = 'none')
+			elif top10nat[count - 1] == 'ESP':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'y', edgecolor = 'none')
+			elif top10nat[count - 1] == 'FIN':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'lavender', edgecolor = 'none')
+			elif top10nat[count - 1] == 'FRA':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'steelblue', edgecolor = 'none')
+			elif top10nat[count - 1] == 'GBR':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'gold', edgecolor = 'none')
+			elif top10nat[count - 1] == 'GER':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'yellow', edgecolor = 'none')
+			elif top10nat[count - 1] == 'HUN':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'darkgreen', edgecolor = 'none')
+			elif top10nat[count - 1] == 'IND':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'peru', edgecolor = 'none')
+			elif top10nat[count - 1] == 'IRE':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'springgreen', edgecolor = 'none')
+			elif top10nat[count - 1] == 'JPN':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'white', edgecolor = 'none')
+			elif top10nat[count - 1] == 'MEX':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'rosybrown', edgecolor = 'none')
+			elif top10nat[count - 1] == 'MON':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'lightsalmon', edgecolor = 'none')
+			elif top10nat[count - 1] == 'NED':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'darkblue', edgecolor = 'none')
+			elif top10nat[count - 1] == 'NZL':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'slateblue', edgecolor = 'none')
+			elif top10nat[count - 1] == 'POL':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'darkorange', edgecolor = 'none')
+			elif top10nat[count - 1] == 'RHO':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'forestgreen', edgecolor = 'none')
+			elif top10nat[count - 1] == 'RSA':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'indigo', edgecolor = 'none')
+			elif top10nat[count - 1] == 'RUS':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'deeppink', edgecolor = 'none')
+			elif top10nat[count - 1] == 'SWE':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'royalblue', edgecolor = 'none')
+			elif top10nat[count - 1] == 'SUI':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'firebrick', edgecolor = 'none')
+			elif top10nat[count - 1] == 'THA':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'tomato', edgecolor = 'none')
+			elif top10nat[count - 1] == 'USA':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'crimson', edgecolor = 'none')
+			elif top10nat[count - 1] == 'VEN':
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'pink', edgecolor = 'none')
+			else:
+				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), edgecolor = 'none')
+			count -= 1
 
-	while rect > 0: #Show details
-		width = (distance * 0.01) + top10pts[rect - 1]
-		leng = len(top10driv[rect - 1])
-		width2 = top10pts[rect - 1] - (leng * 0.5)
-		width3 = top10pts[rect - 1] - (leng * 0.1)
-		ax.text(width2, 11 - rect, top10driv[rect - 1], color = 'black', fontweight = 'bold', **cfont)
-		if top10nat[rect - 1] == 'ITA':
-			abox = AnnotationBbox(ITA, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'ARG':
-			abox = AnnotationBbox(ARG, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'AUS':
-			abox = AnnotationBbox(AUS, (width3, 11 - rect + 0.15))	
-		elif top10nat[rect - 1] == 'AUT':
-			abox = AnnotationBbox(AUT, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'BEL':
-			abox = AnnotationBbox(BEL, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'BRA':
-			abox = AnnotationBbox(BRA, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'CAN':
-			abox = AnnotationBbox(CAN, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'COL':
-			abox = AnnotationBbox(COL, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'DEN':
-			abox = AnnotationBbox(DEN, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'ESP':
-			abox = AnnotationBbox(ESP, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'FIN':
-			abox = AnnotationBbox(FIN, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'FRA':
-			abox = AnnotationBbox(FRA, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'GBR':
-			abox = AnnotationBbox(GBR, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'GER':
-			abox = AnnotationBbox(GER, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'HUN':
-			abox = AnnotationBbox(HUN, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'IND':
-			abox = AnnotationBbox(IND, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'IRE':
-			abox = AnnotationBbox(IRE, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'JPN':
-			abox = AnnotationBbox(JPN, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'MEX':
-			abox = AnnotationBbox(MEX, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'MON':
-			abox = AnnotationBbox(MON, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'NED':
-			abox = AnnotationBbox(NED, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'NZL':
-			abox = AnnotationBbox(NZL, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'POL':
-			abox = AnnotationBbox(POL, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'RHO':
-			abox = AnnotationBbox(RHO, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'RSA':
-			abox = AnnotationBbox(RSA, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'RUS':
-			abox = AnnotationBbox(RUS, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'SWE':
-			abox = AnnotationBbox(SWE, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'SUI':
-			abox = AnnotationBbox(SUI, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'THA':
-			abox = AnnotationBbox(THA, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'USA':
-			abox = AnnotationBbox(USA, (width3, 11 - rect + 0.15))
-		elif top10nat[rect - 1] == 'VEN':
-			abox = AnnotationBbox(VEN, (width3, 11 - rect + 0.15))
-		ax.add_artist(abox)
-		ax.text(width, 11 - rect, top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
-		rect -= 1
+		#Stuff that changes each time
+		(theMin, theMax) = ax.get_xlim()
+		distance = theMax - theMin
+		ax.set_xlim([0, distance * 0.2 + distance])
 
-	plt.pause(0.05)
-	plt.cla()
+		ax.set_yticks(ylocs + 0.5)
+		ax.set_yticklabels(labels, fontsize = 15, fontweight = 'bold', **cfont)
+		ax.set_title("Standings for the " + str(yr) + " Formula 1 Season", fontsize = 35, fontweight = 'bold', **cfont)
+
+
+		rect = 10
+
+		while rect > 0: #Show details
+			width = (distance * 0.01) + (top10pts[rect - 1] + (xChanges[rect - 1] * times))
+			leng = len(top10driv[rect - 1])
+			width2 = (top10pts[rect - 1] + (xChanges[rect - 1] * times)) - (leng * 0.5)
+			width3 = (top10pts[rect - 1] + (xChanges[rect - 1] * times)) - (leng * 0.1)
+			ax.text(width2, 11 - rect + (yChanges[rect - 1] * times), top10driv[rect - 1], color = 'black', fontweight = 'bold', **cfont)
+			if top10nat[rect - 1] == 'ITA':
+				abox = AnnotationBbox(ITA, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'ARG':
+				abox = AnnotationBbox(ARG, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'AUS':
+				abox = AnnotationBbox(AUS, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))	
+			elif top10nat[rect - 1] == 'AUT':
+				abox = AnnotationBbox(AUT, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'BEL':
+				abox = AnnotationBbox(BEL, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'BRA':
+				abox = AnnotationBbox(BRA, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'CAN':
+				abox = AnnotationBbox(CAN, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'COL':
+				abox = AnnotationBbox(COL, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'DEN':
+				abox = AnnotationBbox(DEN, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'ESP':
+				abox = AnnotationBbox(ESP, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'FIN':
+				abox = AnnotationBbox(FIN, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'FRA':
+				abox = AnnotationBbox(FRA, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'GBR':
+				abox = AnnotationBbox(GBR, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'GER':
+				abox = AnnotationBbox(GER, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'HUN':
+				abox = AnnotationBbox(HUN, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'IND':
+				abox = AnnotationBbox(IND, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'IRE':
+				abox = AnnotationBbox(IRE, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'JPN':
+				abox = AnnotationBbox(JPN, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'MEX':
+				abox = AnnotationBbox(MEX, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'MON':
+				abox = AnnotationBbox(MON, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'NED':
+				abox = AnnotationBbox(NED, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'NZL':
+				abox = AnnotationBbox(NZL, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'POL':
+				abox = AnnotationBbox(POL, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'RHO':
+				abox = AnnotationBbox(RHO, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'RSA':
+				abox = AnnotationBbox(RSA, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'RUS':
+				abox = AnnotationBbox(RUS, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'SWE':
+				abox = AnnotationBbox(SWE, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'SUI':
+				abox = AnnotationBbox(SUI, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'THA':
+				abox = AnnotationBbox(THA, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'USA':
+				abox = AnnotationBbox(USA, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			elif top10nat[rect - 1] == 'VEN':
+				abox = AnnotationBbox(VEN, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
+			ax.add_artist(abox)
+			ax.text(width, 11 - rect + (yChanges[rect - 1] * times), top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
+			rect -= 1
+
+		print ("STOP", str(times))
+		plt.pause(0.0001)
+		plt.cla()
+		settings()
 
 ####################################
 ###########Global images############
@@ -731,14 +818,14 @@ def settings(): #axis settings
 
 	ax.patch.set_alpha(0.75)
 
-	ax.grid(True)
-	gridlines = ax.get_xgridlines()
-	gridlinesy = ax.get_ygridlines()
-	for line in gridlines:
-		line.set_color('k')
-		line.set_alpha(0.2)
-	for line in gridlinesy:
-		line.set_alpha(0)
+	ax.grid(False)
+	#gridlines = ax.get_xgridlines()
+	#gridlinesy = ax.get_ygridlines()
+	#for line in gridlines:
+	#	line.set_color('k')
+	#	line.set_alpha(0)
+	#for line in gridlinesy:
+	#	line.set_alpha(0)
 
 
 ####################################
@@ -782,8 +869,7 @@ for year in range(1950, 2017):
 		firstRun(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year)
 	else:
 		holdGraph(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year)
-	for times in range(0, 20): #animate 20 times
-		settings()
-		animate(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year, drivList[year - 1949], natList[year - 1949], carsList[year - 1949], pointsList[year - 1949], times) #current year and the next year
+	#settings()
+	#animate(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year, drivList[year - 1949], natList[year - 1949], carsList[year - 1949], pointsList[year - 1949]) #current year and the next year
 
 
