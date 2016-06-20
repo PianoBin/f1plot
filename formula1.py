@@ -8,7 +8,7 @@ license: MIT
 Please feel free to use and modify this, but keep the above information. Thanks!
 """
 
-import numpy as np
+import numpy as np 
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 from matplotlib import style
@@ -141,8 +141,8 @@ def firstRun(drivers, nations, cars, pts, yr):
 	while rect > 0: #Show details
 		width = (distance * 0.01) + top10pts[rect - 1]
 		leng = len(top10driv[rect - 1])
-		width2 = top10pts[rect - 1] - (leng * 0.4)
-		width3 = top10pts[rect - 1] - (leng * 0.6)
+		width2 = top10pts[rect - 1] - (leng * 0.45)
+		width3 = top10pts[rect - 1] + 0.9
 		ax.text(width2, 11 - rect, top10driv[rect - 1], color = 'black', fontweight = 'bold', **cfont)
 		if top10nat[rect - 1] == 'ITA':
 			abox = AnnotationBbox(ITA, (width3, 11 - rect + 0.15))
@@ -207,7 +207,7 @@ def firstRun(drivers, nations, cars, pts, yr):
 		elif top10nat[rect - 1] == 'VEN':
 			abox = AnnotationBbox(VEN, (width3, 11 - rect + 0.15))
 		ax.add_artist(abox)
-		ax.text(width, 11 - rect, top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
+		ax.text(width + 1.35, 11 - rect, top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
 		rect -= 1
 
 	plt.pause(3)
@@ -335,8 +335,8 @@ def holdGraph(drivers, nations, cars, pts, yr):
 	while rect > 0: #Show details
 		width = (distance * 0.01) + top10pts[rect - 1]
 		leng = len(top10driv[rect - 1])
-		width2 = top10pts[rect - 1] - (leng * 0.4)
-		width3 = top10pts[rect - 1] - (leng * 0.6)
+		width2 = top10pts[rect - 1] - (leng * 0.45)
+		width3 = top10pts[rect - 1] + 0.9
 		ax.text(width2, 11 - rect, top10driv[rect - 1], color = 'black', fontweight = 'bold', **cfont)
 		if top10nat[rect - 1] == 'ITA':
 			abox = AnnotationBbox(ITA, (width3, 11 - rect + 0.15))
@@ -401,7 +401,7 @@ def holdGraph(drivers, nations, cars, pts, yr):
 		elif top10nat[rect - 1] == 'VEN':
 			abox = AnnotationBbox(VEN, (width3, 11 - rect + 0.15))
 		ax.add_artist(abox)
-		ax.text(width, 11 - rect, top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
+		ax.text(width + 1.35, 11 - rect, top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
 		rect -= 1
 
 	plt.pause(3)
@@ -608,7 +608,6 @@ def animate(drivers, nations, cars, pts, yr, drivers2, nations2, cars2, pts2):
 		rect = 10
 
 		while rect > 0: #Show details
-			width = (distance * 0.01) + (top10pts[rect - 1] + (xChanges[rect - 1] * times))
 			leng = len(top10driv[rect - 1])
 			width2 = (top10pts[rect - 1] + (xChanges[rect - 1] * times)) - (leng * 0.5)
 			width3 = (top10pts[rect - 1] + (xChanges[rect - 1] * times)) - (leng * 0.1)
@@ -676,7 +675,6 @@ def animate(drivers, nations, cars, pts, yr, drivers2, nations2, cars2, pts2):
 			elif top10nat[rect - 1] == 'VEN':
 				abox = AnnotationBbox(VEN, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
 			ax.add_artist(abox)
-			ax.text(width, 11 - rect + (yChanges[rect - 1] * times), top10car[rect - 1] + " | " + str(top10pts[rect - 1]), color = 'white', fontweight = 'bold', **cfont)
 			rect -= 1
 
 		print ("STOP", str(times))
