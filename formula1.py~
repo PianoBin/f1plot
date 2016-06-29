@@ -457,6 +457,17 @@ def yDirec(driver, nextYearDrivers, pos):
 	else:
 		return "same"
 
+
+####################################
+##############FOUND#################
+####################################
+def found(pastDrivers, driver):
+	leng = len(pastDrivers)
+	for val in range(0, leng):
+		if pastDrivers[val] == driver:
+			return True
+	return False
+
 ####################################
 #############X CHANGE###############
 ####################################
@@ -526,8 +537,38 @@ def animate(drivers, nations, cars, pts, yr, drivers2, nations2, cars2, pts2):
 			xChanges[val] = xChanges[val] * -1 #decrease x
 
 
+	#add new members to top 10
+	for val in range(0, 10):
+		exist = found(top10driv, top10driv2[val])
+		if exist == False:
+			top10driv.append(top10driv2[val])
+			top10car.append(top10driv2[val])
+			top10nat.append(top10nat2[val])
+			top10pts.append(top10pts2[val])
+
+	newLeng = len(top10driv)
+	#Find y change
+	for val in range(10, newLeng):
+		move = yChange(top10driv[val], top10driv2, 11)
+		yChanges.append(move)
+		direc = yDirec(top10driv[val], top10driv2, 11)
+		yDirections.append(direc)
+
+	for val in range(10, newLeng): #Find x change
+		move = xChange(top10driv[val], top10driv2, top10pts[val], top10pts2)
+		xChanges.append(move)
+
+	
+	for val in range(10, newLeng): #apply signs
+		if yDirections[val] == "down":
+			yChanges[val] = yChanges[val] * -1 #make negative
+			xChanges[val] = xChanges[val] * -1 #decrease x
+
+
+
+###ANIMATE###
 	for times in range(0, 40): #animate 40 times
-		count = 10 # run below 10 times
+		count = newLeng # run below 10 times
 		while count > 0:
 			if top10nat[count - 1] == 'ITA':
 				ax.barh(ylocs[10 - count] + (yChanges[10 - count] * times), top10pts[count - 1] + (xChanges[10 - count] * times), color = 'r', edgecolor = 'none')
@@ -605,7 +646,7 @@ def animate(drivers, nations, cars, pts, yr, drivers2, nations2, cars2, pts2):
 		ax.set_title("Standings for the " + str(yr) + " Formula 1 Season", fontsize = 35, fontweight = 'bold', **cfont)
 
 
-		rect = 10
+		rect = newLeng
 
 		while rect > 0: #Show details
 			leng = len(top10driv[rect - 1])
@@ -676,6 +717,11 @@ def animate(drivers, nations, cars, pts, yr, drivers2, nations2, cars2, pts2):
 				abox = AnnotationBbox(VEN, (width3, 11 - rect + 0.15 + (yChanges[rect - 1] * times)))
 			ax.add_artist(abox)
 			rect -= 1
+
+
+
+		#A Fixed y range
+		plt.ylim(0, 11.75)
 
 		print ("STOP", str(times))
 		plt.pause(0.0001)
@@ -867,7 +913,7 @@ for year in range(1950, 2017):
 		firstRun(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year)
 	else:
 		holdGraph(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year)
-	#settings()
-	#animate(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year, drivList[year - 1949], natList[year - 1949], carsList[year - 1949], pointsList[year - 1949]) #current year and the next year
+	settings()
+	animate(drivList[year - 1950], natList[year - 1950], carsList[year - 1950], pointsList[year - 1950], year, drivList[year - 1949], natList[year - 1949], carsList[year - 1949], pointsList[year - 1949]) #current year and the next year
 
 
